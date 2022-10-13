@@ -7,13 +7,39 @@ public class Program
 {
     public static void Main(string[] Args)
     {
+        printAllTasksAndTodods();
+        printIncompleteTasksAndTodods();
+    }
+    public static void printAllTasksAndTodods()
+    {
+        Console.WriteLine("All tasks:");
+        Console.WriteLine("_________");
+
         using (ProjectContext context = new ProjectContext())
         {
             var tasks = context.Tasks.Include(task => task.ToDo);
             foreach (var task in tasks)
             {
                 Console.WriteLine($"Task: {task.Name}");
-                foreach(var todo in task.ToDo)
+                foreach (var todo in task.ToDo)
+                {
+                    Console.WriteLine($"- {todo.Name}");
+                }
+            }
+        }
+        Console.WriteLine("______________________________");
+    }
+
+    public static void printIncompleteTasksAndTodods()
+    {
+        Console.WriteLine("All incomplete tasks and todos:");
+        using (ProjectContext context = new ProjectContext())
+        {
+            var tasks = context.Tasks.Include(task => task.ToDo).Where(task => task.ToDo.Any(todo => todo.IsComplete == false));
+            foreach (var task in tasks)
+            {
+                Console.WriteLine($"Task: {task.Name}");
+                foreach (var todo in task.ToDo)
                 {
                     Console.WriteLine($"- {todo.Name}");
                 }

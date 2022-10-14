@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ProjectManager.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20221013123547_CreatedTeamsWorkers")]
+    partial class CreatedTeamsWorkers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.10");
@@ -48,13 +50,19 @@ namespace ProjectManager.Migrations
 
             modelBuilder.Entity("TeamWorker", b =>
                 {
+                    b.Property<int>("TeamWorkerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TeamId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("WorkerId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("TeamId", "WorkerId");
+                    b.HasKey("TeamWorkerId");
+
+                    b.HasIndex("TeamId");
 
                     b.HasIndex("WorkerId");
 
@@ -101,21 +109,17 @@ namespace ProjectManager.Migrations
 
             modelBuilder.Entity("TeamWorker", b =>
                 {
-                    b.HasOne("Team", "Team")
+                    b.HasOne("Team", null)
                         .WithMany("Workers")
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Worker", "Worker")
+                    b.HasOne("Worker", null)
                         .WithMany("Teams")
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Team");
-
-                    b.Navigation("Worker");
                 });
 
             modelBuilder.Entity("ToDo", b =>

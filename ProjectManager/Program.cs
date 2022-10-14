@@ -7,8 +7,7 @@ public class Program
 {
     public static void Main(string[] Args)
     {
-        printAllTasksAndTodods();
-        printIncompleteTasksAndTodods();
+        seedWorkers();
     }
     public static void printAllTasksAndTodods()
     {
@@ -29,7 +28,6 @@ public class Program
         }
         Console.WriteLine("______________________________");
     }
-
     public static void printIncompleteTasksAndTodods()
     {
         Console.WriteLine("All incomplete tasks and todos:");
@@ -45,6 +43,33 @@ public class Program
                 }
             }
         }
+    }
+    public static void seedWorkers()
+    {
+        var Frontend = new Team("Frontend");
+        var Backend = new Team("Backend");
+        var Testere = new Team("Testere");
+
+        using (ProjectContext db = new ProjectContext())
+        {
+            //Frontend
+            db.TeamWorker.Add(new TeamWorker { Team = Frontend, Worker = new Worker { Name = "Steen Secher" } });
+            db.TeamWorker.Add(new TeamWorker { Team = Frontend, Worker = new Worker { Name = "Ejvind Møller" } });
+            db.TeamWorker.Add(new TeamWorker { Team = Frontend, Worker = new Worker { Name = "Konrad Sommer" } });
+
+            //Backend
+            db.TeamWorker.Add(new TeamWorker { Team = Backend, Worker = new Worker { Name = "Konrad Sommer" } });
+            db.TeamWorker.Add(new TeamWorker { Team = Backend, Worker = new Worker { Name = "Sofus Lotus" } });
+            db.TeamWorker.Add(new TeamWorker { Team = Backend, Worker = new Worker { Name = "Remo Lademann" } });
+
+            //Testere
+            db.TeamWorker.Add(new TeamWorker { Team = Testere, Worker = new Worker { Name = "Ella Fanth" } });
+            db.TeamWorker.Add(new TeamWorker { Team = Testere, Worker = new Worker { Name = "Anne Dam" } });
+            db.TeamWorker.Add(new TeamWorker { Team = Testere, Worker = new Worker { Name = "Steen Secher" } });
+            db.SaveChanges();
+        };
+
+
     }
     public static void seedTasks()
     {
@@ -72,6 +97,11 @@ public class ProjectContext : DbContext
 {
     public DbSet<Task> Tasks { get; set; }
     public DbSet<ToDo> ToDo { get; set; }
+    public DbSet<Team>? Team { get; set; }
+    public DbSet<Worker>? Worker { get; set; }
+    public DbSet<TeamWorker>? TeamWorker { get; set; }
+
+
 
     public string DbPath { get; }
 
@@ -86,6 +116,11 @@ public class ProjectContext : DbContext
     // special "local" folder for your platform.
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.UseSqlite($"Data Source={DbPath}");
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TeamWorker>()
+            .HasKey(p => new { p.TeamId, p.WorkerId });
+    }
 }
 
 public class Task
@@ -101,4 +136,34 @@ public class ToDo
     public int ToDoId { get; set; }
     public string Name { get; set; }
     public bool IsComplete { get; set; }
+}
+
+public class Team
+{
+    public int TeamId { get; set; }
+    public string Name { get; set; }
+    public List<TeamWorker> Workers { get; } = new();
+    public Team()
+    {
+       
+    }
+    public Team(string name)
+    {
+        Name = name;
+    }
+}
+
+public class Worker
+{
+    public int WorkerId { get; set; }
+    public string Name { get; set; }
+    public List<TeamWorker> Teams { get; } = new();
+}
+
+public class TeamWorker
+{
+    public int TeamId { get; set; }
+    public Team? Team { get; set; }
+    public int WorkerId { get; set; }
+    public Worker? Worker { get; set; }
 }

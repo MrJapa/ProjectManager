@@ -7,7 +7,7 @@ public class Program
 {
     public static void Main(string[] Args)
     {
-        seedTasksAndTeams();
+        PrintTeamsWithoutTasks();
     }
     public static void printAllTasksAndTodods()
     {
@@ -106,6 +106,29 @@ public class Program
 
         db.SaveChanges();
 
+    }
+    public static void seedTeams()
+    {
+        using var db = new ProjectContext();
+        Team t1 = new Team();
+        t1.Name = "TEAM NUMBA 1";
+
+        db.Add(t1);
+
+        db.SaveChanges();
+
+    }
+    public static void PrintTeamsWithoutTasks()
+    {
+        using (ProjectContext context = new ProjectContext())
+        {
+            //var Teams = context.Teams.Include(task => task.ToDo).Where(task => task.ToDo.Any(todo => todo.IsComplete == false));
+            var teams = context.Team.Where(Task => Task.CurrentTask.TaskId == null);
+            foreach (var task in teams)
+            {
+                Console.WriteLine($"Task: {task.Name}");
+            }
+        }
     }
 }
 public class ProjectContext : DbContext

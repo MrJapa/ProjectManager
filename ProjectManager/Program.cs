@@ -7,7 +7,7 @@ public class Program
 {
     public static void Main(string[] Args)
     {
-        seedWorkers();
+        seedTasksAndTeams();
     }
     public static void printAllTasksAndTodods()
     {
@@ -84,13 +84,28 @@ public class Program
 
         Task t2 = new Task();
         t2.Name = "Brew coffee";
-        t2.ToDo.Add(new ToDo { Name = "Pour water",IsComplete = false });
+        t2.ToDo.Add(new ToDo { Name = "Pour water", IsComplete = false });
         t2.ToDo.Add(new ToDo { Name = "Pour coffee", IsComplete = false });
         t2.ToDo.Add(new ToDo { Name = "Turn on", IsComplete = false });
 
         db.Add(t2);
 
         db.SaveChanges();
+    }
+    public static void seedTasksAndTeams()
+    {
+        using var db = new ProjectContext();
+        Team t1 = new Team();
+        t1.Name = "New team";
+
+        Task t2 = new Task();
+        t2.Name = "New Task";
+        t2.ToDo.Add(new ToDo { Name = "New Todo", IsComplete = true });
+        t1.Tasks.Add(t2);
+        db.Add(t1);
+
+        db.SaveChanges();
+
     }
 }
 public class ProjectContext : DbContext
@@ -120,6 +135,12 @@ public class ProjectContext : DbContext
     {
         modelBuilder.Entity<TeamWorker>()
             .HasKey(p => new { p.TeamId, p.WorkerId });
+
+        modelBuilder.Entity<Team>()
+            .HasOne(team => team.CurrentTask);
+
+        modelBuilder.Entity<Worker>()
+            .HasOne(team => team.CurrentTodo);
     }
 }
 
@@ -127,7 +148,6 @@ public class Task
 {
     public int TaskId { get; set; }
     public string Name { get; set; }
-
     public List<ToDo> ToDo { get; } = new();
 }
 
@@ -143,9 +163,11 @@ public class Team
     public int TeamId { get; set; }
     public string Name { get; set; }
     public List<TeamWorker> Workers { get; } = new();
+    public Task? CurrentTask { get; set; }
+    public List<Task> Tasks { get; set; } = new();
     public Team()
     {
-       
+
     }
     public Team(string name)
     {
@@ -158,6 +180,8 @@ public class Worker
     public int WorkerId { get; set; }
     public string Name { get; set; }
     public List<TeamWorker> Teams { get; } = new();
+    public ToDo? CurrentTodo { get; set; }
+    public List<ToDo> ToDos { get; set; } = new();
 }
 
 public class TeamWorker

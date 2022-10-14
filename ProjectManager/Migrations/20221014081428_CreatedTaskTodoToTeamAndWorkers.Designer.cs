@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ProjectManager.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20221014081428_CreatedTaskTodoToTeamAndWorkers")]
+    partial class CreatedTaskTodoToTeamAndWorkers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.10");
@@ -26,12 +28,7 @@ namespace ProjectManager.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("TeamId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("TaskId");
-
-                    b.HasIndex("TeamId");
 
                     b.ToTable("Tasks");
                 });
@@ -42,7 +39,7 @@ namespace ProjectManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CurrentTaskTaskId")
+                    b.Property<int>("CurrentTaskTaskId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -87,14 +84,9 @@ namespace ProjectManager.Migrations
                     b.Property<int?>("TaskId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("WorkerId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("ToDoId");
 
                     b.HasIndex("TaskId");
-
-                    b.HasIndex("WorkerId");
 
                     b.ToTable("ToDo");
                 });
@@ -105,7 +97,7 @@ namespace ProjectManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CurrentTodoToDoId")
+                    b.Property<int>("CurrentTodoToDoId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -119,18 +111,13 @@ namespace ProjectManager.Migrations
                     b.ToTable("Worker");
                 });
 
-            modelBuilder.Entity("Task", b =>
-                {
-                    b.HasOne("Team", null)
-                        .WithMany("Tasks")
-                        .HasForeignKey("TeamId");
-                });
-
             modelBuilder.Entity("Team", b =>
                 {
                     b.HasOne("Task", "CurrentTask")
                         .WithMany()
-                        .HasForeignKey("CurrentTaskTaskId");
+                        .HasForeignKey("CurrentTaskTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("CurrentTask");
                 });
@@ -159,17 +146,15 @@ namespace ProjectManager.Migrations
                     b.HasOne("Task", null)
                         .WithMany("ToDo")
                         .HasForeignKey("TaskId");
-
-                    b.HasOne("Worker", null)
-                        .WithMany("ToDos")
-                        .HasForeignKey("WorkerId");
                 });
 
             modelBuilder.Entity("Worker", b =>
                 {
                     b.HasOne("ToDo", "CurrentTodo")
                         .WithMany()
-                        .HasForeignKey("CurrentTodoToDoId");
+                        .HasForeignKey("CurrentTodoToDoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("CurrentTodo");
                 });
@@ -181,16 +166,12 @@ namespace ProjectManager.Migrations
 
             modelBuilder.Entity("Team", b =>
                 {
-                    b.Navigation("Tasks");
-
                     b.Navigation("Workers");
                 });
 
             modelBuilder.Entity("Worker", b =>
                 {
                     b.Navigation("Teams");
-
-                    b.Navigation("ToDos");
                 });
 #pragma warning restore 612, 618
         }

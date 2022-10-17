@@ -8,6 +8,8 @@ public class Program
     public static void Main(string[] Args)
     {
         PrintTeamsWithoutTasks();
+        Console.WriteLine("_________________");
+        PrintTeamCurrentTask();
     }
     public static void printAllTasksAndTodods()
     {
@@ -92,17 +94,14 @@ public class Program
 
         db.SaveChanges();
     }
+
     public static void seedTasksAndTeams()
     {
         using var db = new ProjectContext();
-        Team t1 = new Team();
-        t1.Name = "New team";
 
-        Task t2 = new Task();
-        t2.Name = "New Task";
-        t2.ToDo.Add(new ToDo { Name = "New Todo", IsComplete = true });
-        t1.Tasks.Add(t2);
-        db.Add(t1);
+        Task t2 = new Task { Name = "Test" };
+        Team t3 = new Team { Name = "TEAM", CurrentTask = t2 };
+        db.Add(t3);
 
         db.SaveChanges();
 
@@ -124,9 +123,24 @@ public class Program
         {
             //var Teams = context.Teams.Include(task => task.ToDo).Where(task => task.ToDo.Any(todo => todo.IsComplete == false));
             var teams = context.Team.Where(Task => Task.CurrentTask.TaskId == null);
+            Console.WriteLine("Team without tasks");
             foreach (var task in teams)
             {
-                Console.WriteLine($"Task: {task.Name}");
+                
+                Console.WriteLine($"Team: {task.Name}");
+            }
+        }
+    }
+    public static void PrintTeamCurrentTask()
+    {
+        using (ProjectContext context = new ProjectContext())
+        {
+            //var Teams = context.Teams.Include(task => task.ToDo).Where(task => task.ToDo.Any(todo => todo.IsComplete == false));
+            var teams = context.Team.Where(Task => Task.CurrentTask.TaskId != null);
+            Console.WriteLine("Team with tasks");
+            foreach (var task in teams)
+            {
+                Console.WriteLine($"Team: {task.Name}");
             }
         }
     }
